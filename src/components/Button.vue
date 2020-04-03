@@ -1,5 +1,5 @@
 <template>
-    <input type="button" :class="getClassName" :value="text">
+    <button @click="click" :class="getClassName"><i v-if="icon" :class="getIcon"></i>{{text}}</button>
 </template>
 <script>
 export default {
@@ -8,11 +8,17 @@ export default {
     props: {
         btnClass: String,
         text: String,
+        icon: String,
+        click: Function,
     },
 
     computed: {
         getClassName(){
             return ("btn btn-"+this.btnClass);
+        },
+
+        getIcon(){
+            return ("glyphicon glyphicon-"+this.icon);
         },
     },
 }
