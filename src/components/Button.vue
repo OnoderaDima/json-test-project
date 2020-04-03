@@ -1,5 +1,8 @@
 <template>
-    <button @click="click" :class="getClassName"><i v-if="icon" :class="getIcon"></i>{{text}}</button>
+    <button @click="$emit('click')" :class="getClassName">
+        <b-icon v-if="icon" :icon="icon"></b-icon>
+        {{text}}
+    </button>
 </template>
 <script>
 export default {

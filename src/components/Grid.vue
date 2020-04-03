@@ -2,7 +2,7 @@
 
 <div class="container-fluid">
     <div class="container-fluid">
-        <Button :click="hello" text="Применить изменения" btnClass="secondary"/>
+        <Button @click="hello" text="Применить изменения" btnClass="secondary"/>
     </div>
     <table class="table table-inverse">
         <thead>
@@ -12,9 +12,13 @@
             </tr>
         </thead>
         <tbody>
-            <tr v-for="(value, name, index) in data" :key="index">
-                <td v-for="col in cols" v-show="col.show" :data-type="col.type" :key="col.id">{{value[col.id]}}</td>
-                <td><Button text="edit" btnClass="primary" icon="pencil"/></td>
+            <tr v-for="(value, index) in data" :key="index">
+                <td v-for="col in cols" v-show="col.show" :data-type="col.type" :key="col.id">
+                    {{value[col.id]}}
+                    {{("edit" in data[index])?data[index].edit:false}}
+                    <input v-if="isEdit(index)">
+                </td>
+                <td><Button @click="edit(index)" btnClass="success" icon="pencil-square"/></td>
             </tr>
         </tbody>
         <tfoot>
@@ -49,7 +53,18 @@ export default {
             alert('Привет из грида!')
         },
 
-        
+        isEdit(index) {
+            return (("edit" in this.data[index])?this.data[index].edit:false);
+        },
+
+        edit(index){ 
+            if ("edit" in this.data[index]) {             
+                this.data[index].edit = !this.data[index].edit;
+            }
+            else {
+                this.$set(this.data[index], "edit", true);
+            }
+        },
     },
 }
 </script>
