@@ -1,8 +1,9 @@
 <template>
 
-<div class="container-fluid">
-    <div class="container-fluid">
-        <Button @click="hello" text="Применить изменения" btnClass="secondary"/>
+<div class="grid container-fluid">
+    <div class="container-fluid panel">
+        <Button text="Сохранить" btnClass="warning"/>
+        <Button @click="confirmChanges" text="Применить изменения" btnClass="secondary"/>
     </div>
     <table class="table table-inverse">
         <thead>
@@ -12,13 +13,12 @@
             </tr>
         </thead>
         <tbody>
-            <tr v-for="(value, index) in data" :key="index">
+            <tr v-for="(value, index) in cache" @dblclick="edit(index)" :key="index">
                 <td v-for="col in cols" v-show="col.show" :data-type="col.type" :key="col.id">
-                    {{value[col.id]}}
-                    {{("edit" in data[index])?data[index].edit:false}}
-                    <input v-if="isEdit(index)">
+                    <span v-if="!isEdit(index)">{{value[col.id]}}</span>
+                    <Input :name="col.id+'_'+index" v-if="isEdit(index)" :type="convertInputTypes(col.type)" :value="value[col.id]"/>
                 </td>
-                <td><Button @click="edit(index)" btnClass="success" icon="pencil-square"/></td>
+                <td><Button @click="edit(index)" :btnClass="getEditBtnClass(index)" icon="pencil-square"/></td>
             </tr>
         </tbody>
         <tfoot>
@@ -29,13 +29,14 @@
 </template>
 <script>
 import Button from '@/components/Button.vue';
+import Input from '@/components/Input.vue';
 
 export default {
     name: "grid",
 
     data() {
         return {
-
+            cache: [],
         }
     },
 
@@ -46,23 +47,59 @@ export default {
 
     components: {
         Button,
+        Input,
+    },
+
+    mounted() {
+        // копируем данные во временный кэш
+        this.cache = this.data;  
     },
 
     methods: {
-        hello() {
-            alert('Привет из грида!')
+        async confirmChanges() {
+            let response = await fetch('/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify(this.data)
+            });
+
+            let result = await response.json();
+            alert(result.message);
+        },
+
+        saveAll() {
+            
+        },
+
+        convertInputTypes(type) {
+            switch(type) {
+                case "NUM":
+                    return "number";
+                case "STR":
+                    return "string";   
+                case "DATE":
+                    return "date";  
+                default:
+                    return "string";                                    
+            }
+        },
+
+        getEditBtnClass(index) {
+            return this.isEdit(index)?"warning":"success";
         },
 
         isEdit(index) {
-            return (("edit" in this.data[index])?this.data[index].edit:false);
+            return (("edit" in this.cache[index])?this.cache[index].edit:false);
         },
 
         edit(index){ 
-            if ("edit" in this.data[index]) {             
-                this.data[index].edit = !this.data[index].edit;
+            if ("edit" in this.cache[index]) {             
+                this.cache[index].edit = !this.cache[index].edit;
             }
             else {
-                this.$set(this.data[index], "edit", true);
+                this.$set(this.cache[index], "edit", true);
             }
         },
     },

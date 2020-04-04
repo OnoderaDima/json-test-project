@@ -1,29 +1,22 @@
 <template>
   <div id="app">
     <div class="container-fluid first-page">
-      <a @click="getJSONData">Обработать данные</a>
+      <a class="link" @click="getJSONData">Обработать данные</a>
     </div>
-    <div class="container-fluid">
-      <h1 v-if="h1Content">{{h1Content}}</h1>
-    </div>
-    <div class="container-fluid">
-      <Grid :cols="cols" :data="data"/>
-    </div>
+    <component :is="PageTemplate"></component>
   </div>
 </template>
 
 <script>
 //import Button from './components/Button.vue'
-import Grid from './components/Grid.vue'
+import SimplePage from './templates/SimplePage.vue'
 
 export default {
   name: 'App',
 
   data() {
     return {
-      h1Content: "",
-      cols: [],
-      data: [],
+      PageTemplate: "",
     }
   },
 
@@ -32,27 +25,39 @@ export default {
       // изменяем заголовок таблицы
       document.title = json.PageTitle;
 
-      // сохраняем h1 
-      this.h1Content = json.H1Content;
+      // получаем стиль шаблона страницы
+      this.PageTemplate = json.PageTemplate;
+
+      // сохраняем h1 в state Vuex
+      this.$store.commit('updateH1Content',json.H1Content);
 
       // получаем массив ключей полей
-      let colKeys = Object.keys(json.ColsTitles);
+      let colKeys = Object.entries(json.ColsOrder);
+
+      // производим сортировку массива по значению 
+      colKeys.sort((prev, next) => {        
+          if (prev[1] < next[1] ) return -1;
+          if (prev[1] < next[1] ) return 1;
+      });
+
       let colTitles = json.ColsTitles;
       let colTypes = json.ColsTypes;
       let colOrders = json.ColsOrder;
       let colShow = json.ColsShow;      
 
-      // проходим по всем ключам и сохраняем колонки в дату
-      this.cols = colKeys.map(id=>({
-                                    id, 
-                                    title: colTitles[id], 
-                                    type: colTypes[id],
-                                    order: colOrders[id],
-                                    show: colShow[id],
-                              }));
+      // проходим по всем ключам и формирует структурированный массив объектов колонок
+      let cols = colKeys.map(id=>({
+                                    id: id[0],
+                                    title: colTitles[id[0]], 
+                                    type: colTypes[id[0]],
+                                    order: colOrders[id[0]],
+                                    show: colShow[id[0]],
+                                  }));
+
+      this.$store.commit('updateCols',cols);
 
       // сохраняем данные
-      this.data = json.Data;
+      this.$store.commit('updateData',json.Data);
     },
 
     async getJSONData() {
@@ -72,29 +77,39 @@ export default {
   },  
   
   components: {
-    Grid,
-   // Button,
+    SimplePage,
   },
 
 
 }
 </script>
 
-<style>
+<style lang="scss">
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  height: 100vh;
+  width: 100%;
+  
+}
+
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  height: 100%;
+  width: 100%;
 }
 
 .first-page {
-  width: 100%;
-  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 30px;
+
+  a.link {
+    cursor: pointer;
+    color: #FFFFFF;
+  }
 }
 </style>
