@@ -2,7 +2,7 @@
 
 <div class="grid container-fluid">
     <div class="container-fluid panel">
-        <Button text="Сохранить" btnClass="warning"/>
+        <Button @click="saveAll" text="Сохранить" btnClass="warning" :disabled="editCache.size?false:true"/>
         <Button @click="confirmChanges" text="Применить изменения" btnClass="secondary"/>
     </div>
     <table class="table table-inverse">
@@ -13,10 +13,10 @@
             </tr>
         </thead>
         <tbody>
-            <tr v-for="(value, index) in cache" @dblclick="edit(index)" :key="index">
+            <tr v-for="(value, index) in data" :key="index">
                 <td v-for="col in cols" v-show="col.show" :data-type="col.type" :key="col.id">
                     <span v-if="!isEdit(index)">{{value[col.id]}}</span>
-                    <Input :name="col.id+'_'+index" v-if="isEdit(index)" :type="convertInputTypes(col.type)" :value="value[col.id]"/>
+                    <Input :name="col.id+'_'+index" v-if="isEdit(index)" :type="convertInputTypes(col.type)" v-model="editCache.get(index)[col.id]"/>
                 </td>
                 <td><Button @click="edit(index)" :btnClass="getEditBtnClass(index)" icon="pencil-square"/></td>
             </tr>
@@ -36,7 +36,8 @@ export default {
 
     data() {
         return {
-            cache: [],
+            editIndexes: [],
+            editCache: new Map(),
         }
     },
 
@@ -50,13 +51,10 @@ export default {
         Input,
     },
 
-    mounted() {
-        // копируем данные во временный кэш
-        this.cache = this.data;  
-    },
-
     methods: {
         async confirmChanges() {
+            alert('В процессе разработки');
+            /*
             let response = await fetch('/', {
                 method: 'POST',
                 headers: {
@@ -67,10 +65,19 @@ export default {
 
             let result = await response.json();
             alert(result.message);
+            */
         },
 
-        saveAll() {
-            
+        saveAll() { 
+            alert('В процессе разработки');
+            /*
+            for (let row of this.editCache.entries()) {
+                this.editIndexes.pop();
+                
+                this.data[row[0]] = Object.assign(row[1]);
+            }
+
+            this.editCache.clear(); */
         },
 
         convertInputTypes(type) {
@@ -81,6 +88,8 @@ export default {
                     return "string";   
                 case "DATE":
                     return "date";  
+                case "DTIME":
+                    return "datetime";                      
                 default:
                     return "string";                                    
             }
@@ -91,15 +100,27 @@ export default {
         },
 
         isEdit(index) {
-            return (("edit" in this.cache[index])?this.cache[index].edit:false);
+            return (this.editIndexes.indexOf(index)+1)?true:false;
+        },
+
+        setEditRowToCache(index) {
+            let dataRow = Object.assign(this.data[index]);
+
+            this.editIndexes.push(index);
+            this.editCache.set(index, dataRow);
+        },
+
+        removeEditRowFromCache(index) {
+            this.editIndexes.splice(this.editIndexes.indexOf(index),1);
+            this.editCache.delete(index);
         },
 
         edit(index){ 
-            if ("edit" in this.cache[index]) {             
-                this.cache[index].edit = !this.cache[index].edit;
+            if (this.editCache.has(index)) {     
+                this.removeEditRowFromCache(index);
             }
             else {
-                this.$set(this.cache[index], "edit", true);
+                this.setEditRowToCache(index);
             }
         },
     },

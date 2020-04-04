@@ -1,5 +1,5 @@
 <template>
-    <button @click="$emit('click')" :class="getClassName">
+    <button @click="$emit('click')" :class="getClassName" :disabled="disabled">
         <b-icon v-if="icon" :icon="icon"></b-icon>
         {{text}}
     </button>
@@ -10,6 +10,7 @@ export default {
 
     props: {
         btnClass: String,
+        disabled: Boolean,
         text: String,
         icon: String,
         click: Function,
@@ -17,7 +18,7 @@ export default {
 
     computed: {
         getClassName(){
-            return ("btn btn-"+this.btnClass);
+            return ("btn btn-"+this.btnClass+' '+(this.disabled?"disabled":""));
         },
 
         getIcon(){

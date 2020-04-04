@@ -1,10 +1,12 @@
 <template>
     <div class="page-template">
         <div class="container-fluid">
-            <h1 v-if="h1Content">{{getH1Content()}}</h1>
-        </div>
-        <div class="container-fluid">
-            <Grid :cols="getCols()" :data="getData()"/>
+            <div class="container-fluid">
+                <h1 v-if="h1Content">{{getH1Content()}}</h1>
+            </div>
+            <div class="container-fluid">
+                <Grid :cols="getCols()" :data="getData()"/>
+            </div>
         </div>
     </div>
 </template>
