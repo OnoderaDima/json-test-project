@@ -111,5 +111,9 @@ body {
     cursor: pointer;
     color: #FFFFFF;
   }
+
+  a.link:hover {
+    color: #ffc107;
+  }
 }
 </style>
